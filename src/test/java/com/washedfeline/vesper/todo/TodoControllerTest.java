@@ -16,6 +16,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -38,7 +39,7 @@ public class TodoControllerTest {
     );
 
     @BeforeEach
-    public void setUp() {
+    void setUp() throws Exception {
         when(todoService.getAllTodos()).thenReturn(expectedTodos);
         when(todoService.getTodo(anyString())).thenReturn(expectedTodos.getFirst());
     }
@@ -76,14 +77,19 @@ public class TodoControllerTest {
                     .andExpect(content().json(objectMapper.writeValueAsString(expectedTodos.getFirst())));
         }
 
-        // TODO: Test it should return 404 if Todo is not found.
+        @Test
+        public void shouldReturnNotFoundWhenTodoDoesNotExist() throws Exception {
+            when(todoService.getTodo(anyString())).thenThrow(new TodoNotFoundException("Todo not found"));
+
+            mockMvc.perform(get("/todos/1"))
+                    .andExpect(status().isNotFound());
+        }
     }
 
     @Nested
     @DisplayName("POST /todos")
     class CreateTodo {
         @Test
-        // TODO: It should return 201 instead of 200.
         public void shouldCreateNewTodo() throws Exception {
             Todo newTodo = new Todo("4", "Test Todo D", false);
 
@@ -92,7 +98,7 @@ public class TodoControllerTest {
             mockMvc.perform(post("/todos")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(newTodo)))
-                    .andExpect(status().isOk())
+                    .andExpect(status().isCreated())
                     .andExpect(content().contentType("application/json"))
                     .andExpect(content().json(objectMapper.writeValueAsString(newTodo)));
         }
@@ -120,19 +126,33 @@ public class TodoControllerTest {
 
         // TODO: Test it should return 400 if Todo is not valid/correct.
 
-        // TODO: Test it should return 404 if Todo is not found.
+        @Test
+        public void shouldReturnNotFoundWhenTodoDoesNotExist() throws Exception {
+            Todo oldTodo = expectedTodos.getFirst();
+            Todo updatedTodo = new Todo(oldTodo.id, "Updated Todo", true);
+
+            when(todoService.updateTodo(any())).thenThrow(new TodoNotFoundException("Todo not found"));
+
+            mockMvc.perform(patch("/todos")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(updatedTodo)))
+                    .andExpect(status().isNotFound());
+        }
     }
 
     @Nested
     @DisplayName("DELETE /todos/{id}")
     class DeleteTodo {
         @Test
-        // TODO: It should return 204 instead of 200.
         public void shouldDeleteTodo() throws Exception {
-            mockMvc.perform(delete("/todos/1"))
-                    .andExpect(status().isOk());
+            mockMvc.perform(delete("/todos/1")).andExpect(status().isNoContent());
         }
 
-        // TODO: Test it should return 404 if Todo is not found.
+        @Test
+        public void shouldReturnNotFoundWhenTodoDoesNotExist() throws Exception {
+            doThrow(new TodoNotFoundException("Todo not found")).when(todoService).deleteTodo(anyString());
+
+            mockMvc.perform(delete("/todos/1")).andExpect(status().isNotFound());
+        }
     }
 }

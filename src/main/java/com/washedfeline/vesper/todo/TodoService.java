@@ -18,7 +18,7 @@ public class TodoService {
         return todoRepository.getAllTodos();
     }
 
-    public Todo getTodo(String id) {
+    public Todo getTodo(String id) throws TodoNotFoundException {
         return todoRepository.getTodo(id);
     }
 
@@ -26,11 +26,11 @@ public class TodoService {
         return todoRepository.addTodo(todo);
     }
 
-    public Todo updateTodo(Todo todo) {
+    public Todo updateTodo(Todo todo) throws TodoNotFoundException {
         return todoRepository.updateTodo(todo);
     }
 
-    public void deleteTodo(String id) {
+    public void deleteTodo(String id) throws TodoNotFoundException {
         todoRepository.deleteTodo(id);
     }
 }

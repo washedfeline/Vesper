@@ -20,13 +20,13 @@ public class TodoRepository {
         return todos;
     }
 
-    public Todo getTodo(String id) {
-        for (Todo todo : todos) {
-            if (todo.id.equals(id)) {
-                return todo;
-            }
-        }
-        return null;
+    public Todo getTodo(String id) throws TodoNotFoundException {
+        final int index = IntStream.range(0, todos.size())
+                .filter(i -> todos.get(i).id.equals(id))
+                .findFirst()
+                .orElseThrow(() -> new TodoNotFoundException("Todo with id " + id + " not found"));
+
+        return todos.get(index);
     }
 
     public Todo addTodo(Todo todo) {
@@ -39,22 +39,18 @@ public class TodoRepository {
         return newTodo;
     }
 
-    public Todo updateTodo(Todo todo) {
+    public Todo updateTodo(Todo todo) throws TodoNotFoundException {
         final int index = IntStream.range(0, todos.size())
                 .filter(i -> todos.get(i).id.equals(todo.id))
                 .findFirst()
-                .orElse(-1);
-        if (index != -1) {
-            todos.set(index, todo);
-            return todo;
-        }
-        return null;
+                .orElseThrow(() -> new TodoNotFoundException("Todo with id " + todo.id + " not found"));
+
+        return todos.set(index, todo);
     }
 
-    public void deleteTodo(String id) {
-        final Todo todoToDelete = getTodo(id);
-        if (todoToDelete != null) {
-            todos.remove(todoToDelete);
-        }
+    public void deleteTodo(String id) throws TodoNotFoundException {
+        final Todo todo = getTodo(id);
+
+        todos.remove(todo);
     }
 }
