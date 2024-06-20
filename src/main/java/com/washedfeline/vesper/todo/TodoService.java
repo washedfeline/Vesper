@@ -30,7 +30,7 @@ public class TodoService {
         return todoRepository.updateTodo(todo);
     }
 
-    public Todo deleteTodo(String id) {
-        return todoRepository.deleteTodo(id);
+    public void deleteTodo(String id) {
+        todoRepository.deleteTodo(id);
     }
 }

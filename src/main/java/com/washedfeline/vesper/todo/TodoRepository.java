@@ -51,11 +51,10 @@ public class TodoRepository {
         return null;
     }
 
-    public Todo deleteTodo(String id) {
+    public void deleteTodo(String id) {
         final Todo todoToDelete = getTodo(id);
         if (todoToDelete != null) {
             todos.remove(todoToDelete);
         }
-        return todoToDelete;
     }
 }
