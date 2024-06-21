@@ -17,7 +17,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-public class TodoServiceTest {
+class TodoServiceTest {
     @MockBean
     private TodoRepository todoRepository;
     private TodoService todoService;

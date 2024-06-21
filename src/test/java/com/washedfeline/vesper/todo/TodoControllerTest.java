@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class TodoControllerTest {
+class TodoControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -48,7 +48,7 @@ public class TodoControllerTest {
     @DisplayName("GET /todos")
     class GetAllTodos {
         @Test
-        public void shouldReturnEmptyListWhenTodosAreEmpty() throws Exception {
+        void shouldReturnEmptyListWhenTodosAreEmpty() throws Exception {
             when(todoService.getAllTodos()).thenReturn(new ArrayList<>());
 
             mockMvc.perform(get("/todos"))
@@ -58,7 +58,7 @@ public class TodoControllerTest {
         }
 
         @Test
-        public void shouldReturnAllTodos() throws Exception {
+        void shouldReturnAllTodos() throws Exception {
             mockMvc.perform(get("/todos"))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json"))
@@ -70,7 +70,7 @@ public class TodoControllerTest {
     @DisplayName("GET /todos/{id}")
     class GetTodoById {
         @Test
-        public void shouldReturnTodoById() throws Exception {
+        void shouldReturnTodoById() throws Exception {
             mockMvc.perform(get("/todos/1"))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("application/json"))
@@ -78,7 +78,7 @@ public class TodoControllerTest {
         }
 
         @Test
-        public void shouldReturnNotFoundWhenTodoDoesNotExist() throws Exception {
+        void shouldReturnNotFoundWhenTodoDoesNotExist() throws Exception {
             when(todoService.getTodo(anyString())).thenThrow(new TodoNotFoundException("Todo not found"));
 
             mockMvc.perform(get("/todos/1"))
@@ -90,7 +90,7 @@ public class TodoControllerTest {
     @DisplayName("POST /todos")
     class CreateTodo {
         @Test
-        public void shouldCreateNewTodo() throws Exception {
+        void shouldCreateNewTodo() throws Exception {
             Todo newTodo = new Todo("4", "Test Todo D", false);
 
             when(todoService.addTodo(any())).thenReturn(newTodo);
@@ -108,7 +108,7 @@ public class TodoControllerTest {
     @DisplayName("PATCH /todos/{id}")
     class UpdateTodo {
         @Test
-        public void shouldUpdateTodo() throws Exception {
+        void shouldUpdateTodo() throws Exception {
             Todo oldTodo = expectedTodos.getFirst();
             Todo updatedTodo = new Todo(oldTodo.id, "Updated Todo", true);
 
@@ -123,7 +123,7 @@ public class TodoControllerTest {
         }
 
         @Test
-        public void shouldReturnNotFoundWhenTodoDoesNotExist() throws Exception {
+        void shouldReturnNotFoundWhenTodoDoesNotExist() throws Exception {
             Todo oldTodo = expectedTodos.getFirst();
             Todo updatedTodo = new Todo(oldTodo.id, "Updated Todo", true);
 
@@ -140,12 +140,12 @@ public class TodoControllerTest {
     @DisplayName("DELETE /todos/{id}")
     class DeleteTodo {
         @Test
-        public void shouldDeleteTodo() throws Exception {
+        void shouldDeleteTodo() throws Exception {
             mockMvc.perform(delete("/todos/1")).andExpect(status().isNoContent());
         }
 
         @Test
-        public void shouldReturnNotFoundWhenTodoDoesNotExist() throws Exception {
+        void shouldReturnNotFoundWhenTodoDoesNotExist() throws Exception {
             doThrow(new TodoNotFoundException("Todo not found")).when(todoService).deleteTodo(anyString());
 
             mockMvc.perform(delete("/todos/1")).andExpect(status().isNotFound());
