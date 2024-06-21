@@ -102,8 +102,6 @@ public class TodoControllerTest {
                     .andExpect(content().contentType("application/json"))
                     .andExpect(content().json(objectMapper.writeValueAsString(newTodo)));
         }
-
-        // TODO: Test it should return 400 if Todo is not valid/correct.
     }
 
     @Nested
@@ -123,8 +121,6 @@ public class TodoControllerTest {
                     .andExpect(content().contentType("application/json"))
                     .andExpect(content().json(objectMapper.writeValueAsString(updatedTodo)));
         }
-
-        // TODO: Test it should return 400 if Todo is not valid/correct.
 
         @Test
         public void shouldReturnNotFoundWhenTodoDoesNotExist() throws Exception {
