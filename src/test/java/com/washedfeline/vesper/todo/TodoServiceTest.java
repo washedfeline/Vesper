@@ -13,8 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class TodoServiceTest {
@@ -116,6 +115,13 @@ class TodoServiceTest {
     @DisplayName("deleteTodo(String id)")
     class DeleteTodo {
         @Test
+        void shouldDeleteTodo() throws Exception {
+            doNothing().when(todoRepository).deleteTodo("1");
+
+            todoService.deleteTodo("1");
+        }
+
+        @Test
         void shouldThrowTodoNotFoundExceptionWhenTodoDoesNotExist() throws Exception {
             doThrow(new TodoNotFoundException("Todo not found")).when(todoRepository).deleteTodo(anyString());
 
@@ -123,5 +129,4 @@ class TodoServiceTest {
 
         }
     }
-
 }
