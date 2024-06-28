@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TodoService {
@@ -15,22 +16,22 @@ public class TodoService {
     }
 
     public List<Todo> getAllTodos() {
-        return todoRepository.getAllTodos();
+        return todoRepository.findAll();
     }
 
-    public Todo getTodo(String id) throws TodoNotFoundException {
-        return todoRepository.getTodo(id);
+    public Optional<Todo> getTodo(String id) {
+        return todoRepository.findById(id);
     }
 
     public Todo addTodo(Todo todo) {
-        return todoRepository.addTodo(todo);
+        return todoRepository.save(todo);
     }
 
-    public Todo updateTodo(Todo todo) throws TodoNotFoundException {
-        return todoRepository.updateTodo(todo);
+    public Todo updateTodo(Todo todo) {
+        return todoRepository.save(todo);
     }
 
-    public void deleteTodo(String id) throws TodoNotFoundException {
-        todoRepository.deleteTodo(id);
+    public void deleteTodo(String id) {
+        todoRepository.deleteById(id);
     }
 }

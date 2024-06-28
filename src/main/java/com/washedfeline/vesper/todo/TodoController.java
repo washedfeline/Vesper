@@ -2,11 +2,11 @@ package com.washedfeline.vesper.todo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/todos")
@@ -25,36 +25,29 @@ public class TodoController {
 
     @GetMapping(path = "{todoId}")
     public Todo getTodo(@PathVariable("todoId") String id) {
-        try {
-            return todoService.getTodo(id);
-        } catch (TodoNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        final Optional<Todo> result = todoService.getTodo(id);
+
+        if (result.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
+        return result.get();
     }
 
     @PostMapping
-    public ResponseEntity<Todo> addTodo(@RequestBody Todo todo) {
-        return new ResponseEntity<>(todoService.addTodo(todo), HttpStatus.CREATED);
+    @ResponseStatus(HttpStatus.CREATED)
+    public Todo addTodo(@RequestBody Todo todo) {
+        return todoService.addTodo(todo);
     }
 
     @PatchMapping
     public Todo updateTodo(@RequestBody Todo todo) {
-        try {
-            return todoService.updateTodo(todo);
-        } catch (TodoNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+        return todoService.updateTodo(todo);
     }
 
     @DeleteMapping(path = "{todoId}")
-    public ResponseEntity<Void> deleteTodo(@PathVariable("todoId") String id) {
-        try {
-            todoService.deleteTodo(id);
-
-            return ResponseEntity.noContent().build();
-        } catch (TodoNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTodo(@PathVariable("todoId") String id) {
+        todoService.deleteTodo(id);
     }
 }
