@@ -1,18 +1,15 @@
 package com.washedfeline.vesper.todo;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -21,112 +18,91 @@ class TodoServiceTest {
     private TodoRepository todoRepository;
     private TodoService todoService;
 
-    private final List<Todo> expectedTodos = List.of(
-            new Todo("1", "Test Todo A", false),
-            new Todo("2", "Test Todo B", true),
-            new Todo("3", "Test Todo C", false)
-    );
-
     @BeforeEach
-    void setUp() throws Exception {
+    void init() {
         todoService = new TodoService(todoRepository);
-
-        when(todoRepository.getAllTodos()).thenReturn(expectedTodos);
-        when(todoRepository.getTodo(anyString())).thenReturn(expectedTodos.getFirst());
     }
 
     @Nested
-    @DisplayName("getAllTodos()")
     class GetAllTodos {
         @Test
-        void shouldReturnEmptyListWhenTodosAreEmpty() {
-            when(todoRepository.getAllTodos()).thenReturn(new ArrayList<>());
-
-            List<Todo> actualTodos = todoService.getAllTodos();
-
-            assertEquals(actualTodos.size(), 0);
-        }
-
-        @Test
         void shouldReturnAllTodos() {
-            List<Todo> actualTodos = todoService.getAllTodos();
+            final List<Todo> mockedTodos = List.of(
+                    new Todo("0", "Take my dog for a walk", false),
+                    new Todo("1", "Clean the house", true),
+                    new Todo("2", "Wash clothes", false)
+            );
 
-            assertEquals(expectedTodos, actualTodos);
+            when(todoRepository.findAll()).thenReturn(mockedTodos);
+
+            final List<Todo> actual = todoService.getAllTodos();
+
+            verify(todoRepository, times(1)).findAll();
+
+            assertEquals(mockedTodos, actual);
         }
     }
 
     @Nested
-    @DisplayName("getTodo(String id)")
     class GetTodoById {
         @Test
-        void shouldThrowTodoNotFoundExceptionWhenTodoDoesNotExist() throws Exception {
-            when(todoRepository.getTodo(anyString())).thenThrow(new TodoNotFoundException("Todo not found"));
+        void shouldReturnTodo() {
+            final Todo todo = new Todo("0", "Take my dog for a walk", false);
 
-            assertThrows(TodoNotFoundException.class, () -> todoService.getTodo("1"));
+            when(todoRepository.findById("0")).thenReturn(Optional.of(todo));
 
-        }
+            final Optional<Todo> actual = todoService.getTodo("0");
 
-        @Test
-        void shouldReturnTodo() throws Exception {
-            Todo actualTodo = todoService.getTodo("1");
+            verify(todoRepository, times(1)).findById("0");
 
-            assertEquals(actualTodo, expectedTodos.getFirst());
+            assertTrue(actual.isPresent());
+            assertEquals(todo, actual.get());
         }
     }
 
     @Nested
-    @DisplayName("addTodo(Todo todo)")
     class AddTodo {
         @Test
         void shouldAddTodo() {
-            Todo todoToAdd = new Todo("1", "New Todo", false);
-            when(todoRepository.addTodo(todoToAdd)).thenReturn(todoToAdd);
+            final Todo todo = new Todo("0", "Take my dog for a walk", false);
 
-            Todo addedTodo = todoService.addTodo(todoToAdd);
+            when(todoRepository.save(any(Todo.class))).thenReturn(todo);
 
-            assertEquals(addedTodo, todoToAdd);
+            final Todo todoToAdd = new Todo(null, todo.title, todo.isCompleted);
+
+            final Todo actual = todoService.addTodo(todoToAdd);
+
+            verify(todoRepository, times(1)).save(todoToAdd);
+
+            assertInstanceOf(String.class, actual.id);
+            assertEquals(todo.title, actual.title);
+            assertEquals(todo.isCompleted, actual.isCompleted);
         }
     }
 
     @Nested
-    @DisplayName("updateTodo(Todo todo)")
     class UpdateTodo {
         @Test
-        void shouldUpdateTodo() throws Exception {
-            Todo todoToUpdate = new Todo("1", "Updated Todo", true);
-            when(todoRepository.updateTodo(todoToUpdate)).thenReturn(todoToUpdate);
+        void shouldUpdateTodo() {
+            final Todo todo = new Todo("0", "Visit family on this weekend", true);
 
-            Todo updatedTodo = todoService.updateTodo(todoToUpdate);
+            when(todoRepository.save(any(Todo.class))).thenReturn(todo);
 
-            assertEquals(updatedTodo, todoToUpdate);
-        }
+            final Todo actual = todoService.updateTodo(todo);
 
-        @Test
-        void shouldThrowTodoNotFoundExceptionWhenTodoDoesNotExist() throws Exception {
-            Todo todoToUpdate = new Todo("1", "Updated Todo", true);
+            verify(todoRepository, times(1)).save(todo);
 
-            when(todoRepository.updateTodo(todoToUpdate)).thenThrow(new TodoNotFoundException("Todo not found"));
-
-            assertThrows(TodoNotFoundException.class, () -> todoService.updateTodo(todoToUpdate));
+            assertEquals(todo, actual);
         }
     }
 
     @Nested
-    @DisplayName("deleteTodo(String id)")
     class DeleteTodo {
         @Test
-        void shouldDeleteTodo() throws Exception {
-            doNothing().when(todoRepository).deleteTodo("1");
+        void shouldDeleteTodo() {
+            todoService.deleteTodo("0");
 
-            todoService.deleteTodo("1");
-        }
-
-        @Test
-        void shouldThrowTodoNotFoundExceptionWhenTodoDoesNotExist() throws Exception {
-            doThrow(new TodoNotFoundException("Todo not found")).when(todoRepository).deleteTodo(anyString());
-
-            assertThrows(TodoNotFoundException.class, () -> todoService.deleteTodo("1"));
-
+            verify(todoRepository, times(1)).deleteById("0");
         }
     }
 }
